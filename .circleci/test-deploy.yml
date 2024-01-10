@@ -16,6 +16,8 @@ promotion_requires: &promotion_requires
     test-credentials-store-macos-custom-tag,
     test-hadolint-install,
     publish-machine,
+    publishx-machine,
+    publishx-docker,
     publish-docker-cache,
     publish-docker-cache-not-found,
     publish-docker-with-buildkit,
@@ -38,6 +40,7 @@ promotion_requires: &promotion_requires
     test-machine-old,
     test-machine-arm,
     test-build-command-workspace,
+    test-buildx-command-workspace,
     test-build-with-args,
     test-build-bash-substitution
   ]
@@ -198,6 +201,33 @@ jobs:
               ls
               exit 1
             fi
+  test-buildx-command-workspace:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - checkout
+      - setup_remote_docker
+      - docker/buildx:
+          dockerfile: test.Dockerfile
+          image: kanopicode/docker-orb-test
+          tag: $CIRCLE_BUILD_NUM-$CIRCLE_SHA1
+          attach-at: "./"
+          platform: "linux/amd64,linux/arm64"
+          push: true
+          docker-username: DOCKER_USER
+          docker-password: DOCKER_PASS
+      - run:
+          name: Check for workspace
+          command: |-
+            echo "Ensuring workspace was attached."
+            if test -f "./verify.txt"; then
+              echo "Success"
+            else
+              echo "Error"
+              pwd
+              ls
+              exit 1
+            fi
   test-build-with-args:
     docker:
       - image: cimg/base:stable
@@ -316,6 +346,11 @@ workflows:
       - test-create-workspace:
           filters: *filters
       - test-build-command-workspace:
+          requires:
+            - test-create-workspace
+          filters: *filters
+      - test-buildx-command-workspace:
+          context: orb-dev
           requires:
             - test-create-workspace
           filters: *filters
@@ -439,6 +474,21 @@ workflows:
             - docker/install-docker-credential-helper
             - docker/configure-docker-credentials-store
           filters: *filters
+      - docker/publishx:
+          name: publishx-machine
+          context: orb-dev
+          dockerfile: test.Dockerfile
+          image: kanopicode/docker-orb-test
+          tag: $CIRCLE_BUILD_NUM-$CIRCLE_SHA1
+          docker-username: DOCKER_USER
+          docker-password: DOCKER_PASS
+          use-docker-credentials-store: true
+          platform: 'linux/amd64,linux/arm64'
+          pre-steps:
+            # Test that it's OK to invoke the commands twice
+            - docker/install-docker-credential-helper
+            - docker/configure-docker-credentials-store
+          filters: *filters
       - docker/publish:
           name: publish-docker
           executor: docker-latest
@@ -450,6 +500,19 @@ workflows:
           docker-username: DOCKER_USER
           docker-password: DOCKER_PASS
           use-docker-credentials-store: true
+          filters: *filters
+      - docker/publishx:
+          name: publishx-docker
+          executor: docker-latest
+          context: orb-dev
+          use-remote-docker: true
+          dockerfile: test.Dockerfile
+          image: kanopicode/docker-orb-test
+          tag: publishx-$CIRCLE_SHA1
+          docker-username: DOCKER_USER
+          docker-password: DOCKER_PASS
+          use-docker-credentials-store: true
+          platform: 'linux/amd64,linux/arm64'
           filters: *filters
       - docker/publish:
           name: publish-docker-with-buildkit
