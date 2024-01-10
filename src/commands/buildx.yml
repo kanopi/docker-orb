@@ -109,7 +109,32 @@ parameters:
     description: >
       Platforms to build docker image for.
 
+  docker-username:
+    type: env_var_name
+    default: DOCKER_LOGIN
+    description: >
+      Name of environment variable storing your Docker username
+
+  docker-password:
+    type: env_var_name
+    default: DOCKER_PASSWORD
+    description: >
+      Name of environment variable storing your Docker password
+
+  use-docker-credentials-store:
+    type: boolean
+    default: false
+    description: >
+      Configure Docker to use a credentials store.
+      This option is only supported on Ubuntu/Debian platforms.
+
 steps:
+  - check:
+      registry: <<parameters.registry>>
+      docker-username: <<parameters.docker-username>>
+      docker-password: <<parameters.docker-password>>
+      use-docker-credentials-store: <<parameters.use-docker-credentials-store>>
+
   - when:
       condition: <<parameters.lint-dockerfile>>
       steps:

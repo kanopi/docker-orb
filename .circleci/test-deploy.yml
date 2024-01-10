@@ -212,6 +212,7 @@ jobs:
           attach-at: "./"
           platform: "linux/amd64,linux/arm64"
           push: true
+          docker-username: DOCKER_USER
       - run:
           name: Check for workspace
           command: |-
@@ -346,6 +347,7 @@ workflows:
             - test-create-workspace
           filters: *filters
       - test-buildx-command-workspace:
+          context: orb-dev
           requires:
             - test-create-workspace
           filters: *filters
