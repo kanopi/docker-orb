@@ -1,0 +1,16 @@
+description: >
+  Build and publish, and update the description of an image using the publish job
+  for multiple architectures
+
+usage:
+  version: 2.1
+
+  orbs:
+    docker: kanopi/docker@x.y.z
+
+  workflows:
+    build:
+      jobs:
+        - docker/publishx:
+            image:  $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
+            platform: 'linux/amd64,linux/arm64'
