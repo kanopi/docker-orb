@@ -483,6 +483,7 @@ workflows:
           docker-username: DOCKER_USER
           docker-password: DOCKER_PASS
           use-docker-credentials-store: true
+          platform: 'linux/amd64,linux/arm64'
           pre-steps:
             # Test that it's OK to invoke the commands twice
             - docker/install-docker-credential-helper
@@ -511,6 +512,7 @@ workflows:
           docker-username: DOCKER_USER
           docker-password: DOCKER_PASS
           use-docker-credentials-store: true
+          platform: 'linux/amd64,linux/arm64'
           filters: *filters
       - docker/publish:
           name: publish-docker-with-buildkit
