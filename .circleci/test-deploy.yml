@@ -210,6 +210,7 @@ jobs:
           image: kanopicode/docker-orb-test
           tag: $CIRCLE_BUILD_NUM-$CIRCLE_SHA1
           attach-at: "./"
+          platform: "linux/amd64,linux/arm64"
       - run:
           name: Check for workspace
           command: |-

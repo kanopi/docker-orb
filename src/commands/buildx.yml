@@ -103,7 +103,7 @@ parameters:
     default: false
     description: >
       Push images to docker remote.
-  
+
   platform:
     type: string
     description: >
